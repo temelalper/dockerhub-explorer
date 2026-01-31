@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Favorite(db.Model):
+class Favorite(db.Model):#bu veritabanından bir tablo olucak demek
+    #eğer db.model yazmazsak sqlalchemy bu sınıfı veritabanına dönüştürmez
     
     
     # id benzersiz olmalı

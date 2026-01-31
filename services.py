@@ -5,7 +5,7 @@ def search_dockerhub(query):
 
     try:
         response = requests.get(url) #serialize işlevi
-
+       #istek yollama
         if response.status_code != 200:
             return []
 

@@ -20,7 +20,7 @@
 
     <div class="input-group mb-5 shadow-sm">
         <input type="text" v-model="arananKelime" @keyup.enter="aramaYap" class="form-control form-control-lg" placeholder="Ne aramak istersin? (örn: nginx)">
-        
+                       
         <button class="btn btn-primary btn-lg" @click="aramaYap" :disabled="yukleniyor">
             [[ yukleniyor ? 'Aranıyor...' : 'Ara 🔍' ]]
         </button>
@@ -71,10 +71,10 @@
 </div>
 
 <script>
-    const { createApp } = Vue;
+    const { createApp } = Vue;//vue uygulamasını başlat
 
     createApp({
-        // flask ile karışmasını engelleyen kısım
+        // flask jinja ile karışmasını engelleyen kısım
         delimiters: ['[[', ']]'], 
 
         data() {
@@ -94,7 +94,7 @@
                 try {
                     // API'den veri çek
                     const cevap = await fetch(`/api/search?q=${this.arananKelime}`);
-                    const veri = await cevap.json();
+                    const veri = await cevap.json();//cevabı oku
                     this.sonuclar = veri;
                 } catch (error) {
                     console.error("Hata:", error);
@@ -103,11 +103,12 @@
                 }
             },
             async favoriyeEkle(urun) {
-                const paket = {
+                const paket = {//gönderilicek paket hazırlanır
                     image_name: urun.name,
                     description: urun.description,
                     star_count: urun.star_count
                 };
+                //backende post isteği at veritabanına kaydet
                 await fetch('/api/favorites', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -116,8 +117,8 @@
                 this.favorileriGetir(); // Listeyi yenile
             },
             async favorileriGetir() {
-                const cevap = await fetch('/api/favorites');
-                this.favoriler = await cevap.json();
+                const cevap = await fetch('/api/favorites');//backendden listeyi istedik
+                this.favoriler = await cevap.json();//gelen liste hafızaya attık
             },
             async favoriSil(id) {
                 await fetch(`/api/favorites/${id}`, { method: 'DELETE' });
@@ -126,6 +127,7 @@
         },
         mounted() {
             this.favorileriGetir(); // Sayfa açılınca favorileri yükle
+           //kullanıcı sayfayı açar açmaz görünür
         }
     }).mount('#app');
 </script>
