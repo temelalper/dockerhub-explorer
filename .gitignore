@@ -10,7 +10,7 @@ instance/
 venv/
 env/
 
-# VS Code ayarları (Senin kişisel ayarların gitmesin)
+# VS Code ayarları 
 .vscode/
 
 # Mac bilgisayarların oluşturduğu gereksiz dosya
