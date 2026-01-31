@@ -1,0 +1,17 @@
+# Python'un oluşturduğu gereksiz derleme klasörleri
+__pycache__/
+*.pyc
+
+# Veritabanı dosyamız (İnternete yüklenmemeli, herkeste boş oluşmalı)
+favorites.db
+instance/
+
+# Sanal ortam klasörü (Eğer varsa)
+venv/
+env/
+
+# VS Code ayarları (Senin kişisel ayarların gitmesin)
+.vscode/
+
+# Mac bilgisayarların oluşturduğu gereksiz dosya
+.DS_Store

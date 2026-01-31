@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>DockerHub Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <style>
+        body { background-color: #f4f6f9; }
+        .card { transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body class="p-4">
+
+<div id="app" class="container">
+    
+    <h1 class="text-center mb-4">🐳 DockerHub Explorer <span class="badge bg-success fs-6">Vue.js</span></h1>
+
+    <div class="input-group mb-5 shadow-sm">
+        <input type="text" v-model="arananKelime" @keyup.enter="aramaYap" class="form-control form-control-lg" placeholder="Ne aramak istersin? (örn: nginx)">
+        
+        <button class="btn btn-primary btn-lg" @click="aramaYap" :disabled="yukleniyor">
+            [[ yukleniyor ? 'Aranıyor...' : 'Ara 🔍' ]]
+        </button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3 class="text-primary">🔍 Sonuçlar</h3>
+            <hr>
+
+            <div v-if="yukleniyor" class="text-center text-muted">Aranıyor... ⏳</div>
+
+            <div v-if="!yukleniyor && sonuclar.length === 0" class="text-muted">
+                Sonuç yok veya arama yapılmadı.
+            </div>
+
+            <div v-for="veri in sonuclar" :key="veri.name" class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">[[ veri.name ]]</h5>
+                    <p class="card-text small text-muted">[[ veri.description || 'Açıklama yok' ]]</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>⭐ [[ veri.star_count ]]</small>
+                        <button @click="favoriyeEkle(veri)" class="btn btn-sm btn-outline-danger">
+                            ❤️ Ekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h3 class="text-danger">❤️ Favorilerim</h3>
+            <hr>
+
+            <div v-if="favoriler.length === 0" class="text-muted">Henüz favorin yok.</div>
+
+            <div v-for="fav in favoriler" :key="fav.id" class="card mb-2 border-danger">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="fw-bold">[[ fav.image_name ]]</h6>
+                        <button @click="favoriSil(fav.id)" class="btn btn-sm btn-danger py-0">Sil</button>
+                    </div>
+                    <p class="small text-muted mb-0">[[ fav.description ]]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        // DÜZELTME 3: İşte Flask'ı susturan sihirli ayar burası!
+        delimiters: ['[[', ']]'], 
+
+        data() {
+            return {
+                arananKelime: '',
+                sonuclar: [],
+                favoriler: [],
+                yukleniyor: false
+            }
+        },
+        methods: {
+            async aramaYap() {
+                if (!this.arananKelime) return;
+                this.yukleniyor = true;
+                this.sonuclar = []; // Temizle
+
+                try {
+                    // API'den veri çek
+                    const cevap = await fetch(`/api/search?q=${this.arananKelime}`);
+                    const veri = await cevap.json();
+                    this.sonuclar = veri;
+                } catch (error) {
+                    console.error("Hata:", error);
+                } finally {
+                    this.yukleniyor = false;
+                }
+            },
+            async favoriyeEkle(urun) {
+                const paket = {
+                    image_name: urun.name,
+                    description: urun.description,
+                    star_count: urun.star_count
+                };
+                await fetch('/api/favorites', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(paket)
+                });
+                this.favorileriGetir(); // Listeyi yenile
+            },
+            async favorileriGetir() {
+                const cevap = await fetch('/api/favorites');
+                this.favoriler = await cevap.json();
+            },
+            async favoriSil(id) {
+                await fetch(`/api/favorites/${id}`, { method: 'DELETE' });
+                this.favorileriGetir();
+            }
+        },
+        mounted() {
+            this.favorileriGetir(); // Sayfa açılınca favorileri yükle
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
